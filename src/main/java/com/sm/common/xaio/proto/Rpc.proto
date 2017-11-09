@@ -1,0 +1,88 @@
+package rpc_client;
+
+option java_package = "com.sm.common.xaio.proto";
+option java_outer_classname = "RpcData";
+option java_generic_services = true;
+
+enum RpcErrno {
+  // option allow_alias = true;
+  kSuccess = 0;
+  kOk = 0;
+  kServiceErrorStatus = 100001;
+  kServiceBuzy = 100020;
+
+  // 尚未认证
+  kNoAuthorized = 100030;
+
+  // 认证失败
+  kAuthorizedFailed = 100040;
+
+  kInvalidIdent  = 100050;
+
+  // 无效的请求
+  // RpcProto Message 解析失败
+  kInvalidProtoPackage = 100051;
+
+  // 无效的请求
+  // Request Message 解析失败
+  kInvalidRequestPackage = 100052;
+
+  // 方法尚未实现
+  kMethodNotImplement = 100053;
+
+  // 没有请求的服务
+  kNoSuchService = 100060;
+
+  // 没有请求的方法
+  kNoSuchMethod = 100070;
+
+  kCancelled = 100100;
+
+  // 请求已经完成，取消失败
+  kCancellingFailed = 100105;
+
+  kInternalError = 100980;
+
+  //
+  kClientErrorStatus = 200001;
+  kIdle = 200010;
+  kChannelError = 200030;
+
+  // 请求已经完整了，此错误发生在 CancelRequest 时
+  kRequestHasCompleted = 200050;
+
+  kTimedout = 200080;
+
+  kServerStopped = 200100;
+
+  kUnknownError = 300001;
+};
+
+
+enum CommType {
+  kRequest = 1;
+  kResponse = 8;
+
+  // kControlType 是一个分割符，所有大于的它的都是控制类请求
+  kControlType = 100;
+  kAuthorize = 120;
+  kCancelRequest = 130;
+  kHeartBeat = 150;
+};
+
+message RpcProto {
+  required int32 type = 10;
+  // 再一次请求时， 服务器会为每一个客户端指定一个唯一的 ID
+  // 用于标识客户端，第一次请求时，客户端需要将 client_id 设置为 -1
+  optional int32 requestid = 50;
+  optional string service_name = 100;
+  optional string method_name = 110;
+  optional RpcErrno rpc_errno = 200 [default = kSuccess];
+  optional string user_error_msg = 210;
+
+  // 格外的控制选项, 用于取消请求
+  optional int32 cancelled_reqid = 300;
+
+  optional int32 compress = 400;  // 压缩方式
+  optional bytes body = 500;
+};
